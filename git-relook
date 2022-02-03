@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+path="$1"
+root="$(git rev-parse --show-toplevel)"
+
+record="$root/.git/overlook/$(echo $path | sed 's/\./___/g' | sed 's/\//____/g')"
+if [ -f "$record" ]; then
+  git update-index --no-skip-worktree "$path"
+  rm "$record"
+fi;

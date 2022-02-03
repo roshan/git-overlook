@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -eu
+
+root="$(git rev-parse --show-toplevel)"
+
+get_record_name() {
+  record="$root/.git/overlook/$(echo $1 | sed 's/\./___/g' | sed 's/\//____/g')"
+  echo "$record"
+}
+
+for file in $(git ls-files -v | grep ^S | sed 's/S //'); do
+  record="$(get_record_name $file)"
+  record_mtime="$(stat -f %m $record)"
+  file_mtime="$(stat -f %m $file)"
+
+  if [ "$record_mtime" -lt "$file_mtime" ]; then
+    echo "File $file is overlooked but has been modified since. Please run either 'git overlook $file' or 'git relook $file'" 1>&2
+    exit 1
+  else
+    echo "File $file is overlooked but hasn't been modified"
+  fi;
+
+done;
